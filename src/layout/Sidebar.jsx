@@ -1,70 +1,85 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { updateCHatUser } from "../redux/apiRequests";
 
-function Sidebar({ onUserSelect }) {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [offset, setOffset] = useState(0);
-  const limit = 20; // Number of users per page
+const Sidebar = ({ currentUser, chattedUsers, onlineUsers }) => {
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
-  // const fetchUsers = async () => {
-  //   if (loading || !hasMore) return;
+  // Limit the number of online users displayed
+  const limitedOnlineUsers = onlineUsers.slice(0, 6); // Show only the first 8 online users
 
-  //   setLoading(true);
-  //   try {
-  //     const response = await axios.get('/chats/users', {
-  //       params: { limit, offset }
-  //     });
-  //     setUsers(prevUsers => [...prevUsers, ...response.data]);
-      
-  //     if (response.data.length < limit) {
-  //       setHasMore(false);  // No more users to fetch
-  //     }
-  //     setOffset(prevOffset => prevOffset + limit); // Increment offset for next fetch
-  //   } catch (error) {
-  //     console.error("Error fetching users: ", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  // Optionally, you can randomize the displayed users
+  // const limitedOnlineUsers = [...onlineUsers].sort(() => 0.5 - Math.random()).slice(0, 8);
 
-  // useEffect(() => {
-  //   fetchUsers();  // Fetch initial user list
-  // }, []);
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    const handleScroll = (e) => {
-      const { scrollTop, clientHeight, scrollHeight } = e.target;
-      if (scrollHeight - scrollTop === clientHeight) {
-        // fetchUsers();  // Fetch more users when scrolled to the bottom
-        console.log('Fetching more users...');
-      }
-    };
-
-    const sidebar = document.querySelector('.sidebar');
-    sidebar.addEventListener('scroll', handleScroll);
-
-    return () => {
-      sidebar.removeEventListener('scroll', handleScroll);
-    };
-  }, [hasMore, loading]);
+  const selectUser = () => {
+    console.log("User selected");
+    updateCHatUser(dispatch);
+  }
 
   return (
-    <div className="sidebar bg-gray-100 w-1/4 h-full border-r overflow-y-auto" style={{ maxHeight: '400px' }}>
-      <h2 className="text-lg font-bold p-4">Chats</h2>
-      <ul>
-        {users.map(user => (
-          <li
-            key={user.userId}
-            className="p-4 hover:bg-gray-200 cursor-pointer"
-            onClick={() => onUserSelect(user.userId)}  // Trigger chat window when clicked
-          >
-            User {user.userId}  {/* Replace with actual user details */}
-          </li>
+    <div className="bg-black text-white w-1/4 p-4 flex flex-col">
+      {/* Header - Current User & Online Users */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          <img
+            src={currentUser.avatar}
+            alt="Current User"
+            className="w-12 h-12 rounded-full border-2 border-green-500"
+          />
+          <span className="ml-4 text-2xl font-extrabold">
+            {currentUser.username}
+          </span>
+        </div>
+        <div>
+          <button className="p-2 text-gray-400 hover:text-white">✏️</button>
+          <button className="p-2 text-gray-400 hover:text-white">⚙️</button>
+        </div>
+      </div>
+
+      {/* Online Users */}
+
+      <div className="flex overflow-x-auto mx-2 mb-6 mt-2 py-2 px-1 scrollbar-hide">
+        {limitedOnlineUsers.map((user) => (
+          <div key={user.id} className="relative mr-2">
+            <img
+              src={user.avatar}
+              alt="Online User"
+              className="w-11 h-11 rounded-full border-2 border-green-500 hover:scale-110 transition-transform"
+            />
+            {/* Optional: Badge for online status */}
+            <span className="absolute right-0 bottom-0 w-3 h-3 bg-green-500 border-2 border-black rounded-full"></span>
+          </div>
         ))}
-      </ul>
-      {loading && <p className="p-4 text-center">Loading more users...</p>}
+      </div>
+
+      {/* Messages List with Custom Scrollbar */}
+      <h3 className="text-xl font-bold mb-4">Messages</h3>
+      <div className="flex-1 space-y-2 overflow-y-auto scrollbar-custom" onClick={selectUser}>
+        {chattedUsers.map((user) => (
+          <div
+            key={user.id}
+            onClick={() => setSelectedUserId(user.id)}
+            className={`flex items-center p-3 rounded-lg transition cursor-pointer ${
+              selectedUserId === user.id
+                ? "bg-gray-700"
+                : "bg-black hover:bg-gray-800"
+            }`}
+          >
+            <img
+              src={user.avatar}
+              alt={user.username}
+              className="w-10 h-10 rounded-full mr-3"
+            />
+            <div>
+              <p className="text-white font-semibold">{user.username}</p>
+              <p className="text-gray-400 text-sm">{user.latestMessage}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
     </div>
   );
 };
