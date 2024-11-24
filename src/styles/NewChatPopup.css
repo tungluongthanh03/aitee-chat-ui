@@ -1,0 +1,92 @@
+/* Popup Background */
+.popup-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  
+  /* Popup Container */
+  .popup-container {
+    background-color: #1a1a1a; /* Dark gray */
+    width: 90%;
+    max-width: 400px; /* Adjust the width */
+    border-radius: 20px; /* Rounded corners */
+    padding: 20px;
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.5); /* Soft shadow */
+    position: relative;
+  }
+  
+  /* Header Section */
+  .popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .popup-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff; /* White text */
+  }
+  
+  .popup-close {
+    background: none;
+    border: none;
+    color: #aaa; /* Light gray */
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+  
+  .popup-close:hover {
+    color: #fff; /* White when hovered */
+  }
+  
+  /* Input Field */
+  .popup-input {
+    width: 100%;
+    padding: 10px;
+    background-color: #2a2a2a; /* Slightly lighter gray */
+    color: #fff; /* White text */
+    border: none;
+    border-radius: 10px;
+    margin-top: 10px;
+    font-size: 1rem;
+  }
+  
+  .popup-input::placeholder {
+    color: #777; /* Light gray placeholder */
+  }
+  
+  /* Button */
+  .popup-button {
+    background-color: #007bff; /* Blue button */
+    color: #fff;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    margin-top: 20px;
+    width: 100%;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .popup-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+  }
+
+  .popup-button:disabled {
+    background-color: #0056b3; /* Gray background for disabled button */
+    color: #aaa; /* Light gray text */
+    /* cursor: not-allowed; Not-allowed cursor for disabled button */
+  }
+  
+  
+  
