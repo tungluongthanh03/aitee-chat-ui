@@ -1,0 +1,29 @@
+.tag {
+    display: inline-flex;
+    align-items: center;
+    background-color: #add8e6; /* Light blue */
+    color: #4b4b4b; /* Dark grey for text */
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  .tag-text {
+    margin-right: 8px; /* Space between text and button */
+  }
+  
+  .close-btn {
+    background: none;
+    border: none;
+    color: #4b4b4b; /* Match text color */
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .close-btn:hover {
+    color: red; /* Highlight when hovered */
+  }
+  

@@ -1,28 +1,43 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useSocket } from "./SocketContext";
+import { addNewConversation, addNewMessage } from "../redux/apiRequests";
 
 function MessageInput() {
   const [message, setMessage] = useState("");
 
   const chatUser = useSelector((state) => state.chatUser);
+  const groupChat = useSelector((state) => state.groupChat);
   const currentUser = useSelector((state) => state.user);
 
   const socket = useSocket();
+  const dispatch = useDispatch();
 
   const handleSendMessage = () => {
-    socket.emit("sendMessage", {
+    const newMessage = {
       sendFrom: currentUser.id,
-      sendTo: chatUser.id,
+      sendToUser: chatUser?.id ,
+      sendToGroupChat: groupChat.id,
       content: message,
-    });
-    const newConversation = {
-      id: chatUser.id,
-      username: chatUser.username,
-      avatar: chatUser.avatar,
-      latestMessage: message,
     }
-    console.log(message);
+
+    socket.emit("sendMessage", newMessage);
+    addNewMessage(dispatch, newMessage);
+
+    const newConversation = groupChat.id === null ? {
+      targetType: "user",
+      targetId: chatUser.id,
+      targetName: chatUser.username,
+      targetAvatar: chatUser.avatar,
+      lastMessage: message,
+    } : {
+      targetType: "groupChat",
+      targetId: groupChat.id,
+      targetName: groupChat.name,
+      targetAvatar: groupChat.avatar,
+      lastMessage: message,
+    }
+    addNewConversation(dispatch, newConversation)
 
     setMessage("");
   };

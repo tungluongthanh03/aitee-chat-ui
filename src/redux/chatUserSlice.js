@@ -5,18 +5,21 @@ export const chatUserSlice = createSlice({
   initialState: {
     id: null,
     username: null,
-    avatar:
-      null,
+    avatar: null,
   },
   reducers: {
     updateChatUser: (state, action) => {
       state.id = action.payload.id;
       state.username = action.payload.username;
-      state.avatar = action.payload.avatar;
+      state.avatar = action.payload.avatar || "https://cdn-icons-png.flaticon.com/512/9187/9187604.png";
+    },
+    resetChatUser: (state) => {
+      state.id = null;
+      state.username = null;
+      state.avatar = null;
     },
   },
 });
 
-export const { updateChatUser } =
-  chatUserSlice.actions;
+export const { updateChatUser, resetChatUser } = chatUserSlice.actions;
 export default chatUserSlice.reducer;

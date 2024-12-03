@@ -3,6 +3,7 @@ import chatUserReducer from "./chatUserSlice";
 import conversationsReducer from "./conversationsSlice";
 import userReducer from "./userSlice";
 import messagesReducer from "./messagesSlice";
+import groupchatReducer from "./groupChatSlice";
 
 export default configureStore({
     reducer: {
@@ -10,5 +11,6 @@ export default configureStore({
         conversations: conversationsReducer,
         user: userReducer,
         messages: messagesReducer,
+        groupChat: groupchatReducer,
     }
 })

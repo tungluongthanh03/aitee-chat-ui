@@ -11,11 +11,10 @@ export const conversationsSlice = createSlice({
     },
 
     newConversation: (state, action) => {
-      state.list.forEach((conversation, id) => {
-        if (conversation.id === action.payload.id) {
-          state.list.slice(id, 1);
-        }
-      });
+      state.list = state.list.filter(
+        (conversation) => conversation.targetId !== action.payload.targetId
+      );
+    
       state.list.unshift(action.payload);
     },
   },

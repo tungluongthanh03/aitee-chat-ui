@@ -13,7 +13,7 @@
   .popup-container {
     background-color: #1a1a1a; /* Dark gray */
     width: 90%;
-    max-width: 400px; /* Adjust the width */
+    max-width: 500px; /* Adjust the width */
     border-radius: 20px; /* Rounded corners */
     padding: 20px;
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.5); /* Soft shadow */

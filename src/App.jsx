@@ -10,7 +10,6 @@ const ChatApp = () => {
   const dispatch = useDispatch();
   const [username, setLocalUsername] = useState("");
   const [id, setLocalId] = useState("");
-  const [avatar, setLocalAvatar] = useState("");
 
   const handleLogin = () => {
     if (username && id) {

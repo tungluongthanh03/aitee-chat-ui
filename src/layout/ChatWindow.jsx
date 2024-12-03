@@ -1,20 +1,37 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import MessageInput from "./MessageInput";
 import NewChatPopup from "./NewChatPopup";
 import { useDispatch, useSelector } from "react-redux";
-import { addNewMessage, getChatUser, getMessages, startChat } from "../redux/apiRequests";
+import {
+  addNewConversation,
+  addNewMessage,
+  getChatTarget,
+  getMessages,
+} from "../redux/apiRequests";
 import { useSocket } from "./SocketContext";
-
+import DetailAreaGroup from "./DetailAreaGroup";
 
 const ChatWindow = () => {
   const [showDetail, setShowDetail] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false); // Popup state
+
+  const currentUser = useSelector((state) => state.user);
   const chatUser = useSelector((state) => state.chatUser);
+
+  const groupChat = useSelector((state) => state.groupChat);
   const messages = useSelector((state) => state.messages);
+
+  const chatRef = useRef(null);
+  const chatUserRef = useRef(chatUser);
+  const groupChatRef = useRef(groupChat);
+
+  useEffect(() => {
+    chatUserRef.current = chatUser;
+    groupChatRef.current = groupChat;
+  }, [chatUser, groupChat]);
 
   const dispatch = useDispatch();
   const socket = useSocket();
-
 
   const toggleDetail = () => {
     setShowDetail(!showDetail);
@@ -23,28 +40,61 @@ const ChatWindow = () => {
   const openPopup = () => setIsPopupOpen(true); // Open popup
   const closePopup = () => setIsPopupOpen(false); // Close popup
 
-  const startNewChat = async (username) => {
-    const newChat = await startChat(username);
-    if(newChat.data.success) {
-      getChatUser(dispatch, newChat.data.user[0]);
-      getMessages(dispatch, newChat.data.user[0].id);
-    } else {
-      alert("Error starting chat: " + newChat.data.message);
-    }
+  const startNewChat = async (target) => {
+    getChatTarget(dispatch, target);
+    getMessages(dispatch, target.targetId);
   };
 
   useEffect(() => {
-    socket.on("receivedMessage", (message) => {
-      const { username, avatar, sendFrom, content } = message;
-      const newMessage = {
-        sender: username,
-        content: content,
-        avatar: avatar,
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    const handleReceivedMessage = (message) => {
+      addNewMessage(dispatch, message);
+    };
+
+    socket.on("receivedMessage", (receivedMessage) => {
+      const { sendFrom, content, username, userAvatar } = receivedMessage;
+
+      console.log(receivedMessage);
+      const newConversation = {
+        targetType: "user",
+        targetId: sendFrom,
+        targetName: username,
+        targetAvatar: userAvatar,
+        lastMessage: content,
+      };
+      addNewConversation(dispatch, newConversation);
+      if (sendFrom === chatUserRef.current?.id) {
+        handleReceivedMessage(receivedMessage);
       }
-      console.log(newMessage);
-      addNewMessage(dispatch, newMessage);
     });
-  })
+
+    socket.on("receivedMessageGroup", (receivedMessage) => {
+      const { content, groupName, groupChatAvatar, sendToGroupChat } =
+        receivedMessage;
+
+      const newConversation = {
+        targetType: "group",
+        targetId: sendToGroupChat,
+        targetName: groupName,
+        targetAvatar: groupChatAvatar,
+        lastMessage: content,
+      };
+      addNewConversation(dispatch, newConversation);
+      if (sendToGroupChat === groupChatRef.current?.id) {
+        handleReceivedMessage(receivedMessage);
+      }
+    });
+
+    return () => {
+      socket.off("receivedMessage", handleReceivedMessage);
+      socket.off("receivedMessageGroup", handleReceivedMessage);
+    };
+  }, [dispatch, socket]);
 
   return (
     <div className="flex h-full w-full">
@@ -54,7 +104,7 @@ const ChatWindow = () => {
         onStartChat={startNewChat}
       />
       {/* Main Chat Area */}
-      {chatUser.username == null ? (
+      {chatUser.id == null && groupChat.id == null ? (
         <div className="flex-1 flex flex-col justify-center items-center">
           <div className="text-center">
             <div className="flex justify-center mb-4">
@@ -74,7 +124,10 @@ const ChatWindow = () => {
             <p className="text-gray-400 mb-4">
               Send a message to start a chat.
             </p>
-            <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600" onClick={openPopup}>
+            <button
+              className="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600"
+              onClick={openPopup}
+            >
               Send message
             </button>
           </div>
@@ -90,11 +143,13 @@ const ChatWindow = () => {
             <div className="flex items-center justify-between mb-4 border-b border-gray-600 pb-2">
               <div className="flex items-center">
                 <img
-                  src={chatUser.avatar}
-                  alt="Chat User"
+                  src={chatUser?.avatar || groupChat.avatar}
+                  alt="Chat Target"
                   className="w-10 h-10 rounded-full mr-3"
                 />
-                <span className="font-bold">{chatUser.username}</span>
+                <span className="font-bold">
+                  {chatUser?.username || groupChat.name}
+                </span>
               </div>
               <div className="flex space-x-6 mr-5 text-gray-400">
                 <button className="hover:text-white">📞</button>
@@ -106,32 +161,68 @@ const ChatWindow = () => {
             </div>
 
             {/* Chat Messages */}
-            <div className="flex-1 space-y-4 overflow-y-auto scrollbar-custom p-4">
-              {messages?.list.map((msg, index) => (
+            <div
+              className="flex-1 space-y-4 overflow-y-auto scrollbar-custom p-4"
+              ref={chatRef}
+              style={{
+                overflowY: "auto",
+              }}
+            >
+              {messages?.list.map((msg, idx) => (
                 <div
-                  key={index}
+                  key={msg.messageID}
                   className={`flex items-end ${
-                    msg.sender === "me" ? "justify-end" : ""
+                    msg.sendFrom === currentUser.id ? "justify-end" : ""
                   }`}
                 >
-                  {msg.sender !== "me" && (
-                    <img
-                      src={msg.avatar}
-                      alt="Sender Avatar"
-                      className="w-8 h-8 rounded-full mr-2"
-                    />
+                  {msg.sendFrom !== currentUser.id && (
+                    <div className="relative group">
+                      <img
+                        src={
+                          chatUser?.avatar ||
+                          (() => {
+                            const sender =
+                              groupChat.list.find(
+                                (user) => user.userid === msg.sendFrom
+                              )?.avatar ||
+                              "https://cdn-icons-png.flaticon.com/512/9187/9187604.png";
+                            return sender; // Return sender's avatar if found
+                          })
+                        }
+                        alt="sender Avatar"
+                        className="w-8 h-8 rounded-full mr-2"
+                      />
+                      <div className="absolute bottom-[110%] left-1/2 transform -translate-x-1/2 text-xs bg-gray-700 text-white py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                        {chatUser?.username ||
+                          groupChat.list.find(
+                            (user) => user.userid === msg.sendFrom
+                          )?.username}
+                      </div>
+                    </div>
                   )}
                   <div
-                    className={`max-w-lg py-2 px-3 rounded-3xl text-[15px] ${
-                      msg.sender === "me"
+                    className={`max-w-lg px-3 py-2 rounded-3xl text-[15px] ${
+                      msg.sendFrom === currentUser.id
                         ? "bg-blue-500 text-left"
                         : "bg-gray-800 text-left"
-                    }`}
+                    }
+                    `}
                     style={{
                       wordBreak: "break-word",
                       overflowWrap: "break-word",
                     }}
                   >
+                    {msg.sendFrom !== currentUser.id &&
+                      chatUser.id === null && (
+                        <p>
+                          {groupChat.list.forEach((user) => {
+                            // get sender's avatar from groupChat
+                            if (user.id === msg.sendFrom) {
+                              return user.avatar;
+                            }
+                          })}
+                        </p>
+                      )}
                     <p>{msg.content}</p>
                   </div>
                 </div>
@@ -150,21 +241,31 @@ const ChatWindow = () => {
               <h3 className="text-xl font-bold mb-4 text-center">Details</h3>
               <div className="flex flex-col items-center">
                 <img
-                  src={chatUser.avatar}
+                  src={chatUser?.avatar || groupChat.avatar}
                   alt="User Avatar"
                   className="w-20 h-20 rounded-full mb-4"
                 />
-                <span className="text-lg font-bold">{chatUser.username}</span>
+                <span className="text-lg font-bold">
+                  {chatUser?.username || groupChat.name}
+                </span>
                 <div className="mt-8 space-y-4 w-full">
-                  <button className="w-full bg-red-500 text-white font-bold py-2 rounded-lg hover:bg-red-600">
-                    Report
-                  </button>
-                  <button className="w-full bg-red-500 text-white font-bold py-2 rounded-lg hover:bg-red-600">
-                    Block
-                  </button>
-                  <button className="w-full bg-red-500 text-white font-bold py-2 rounded-lg hover:bg-red-600">
-                    Delete Chat
-                  </button>
+                  {chatUser.username === null ? (
+                    <>
+                      <DetailAreaGroup groupChat={groupChat} currentUser={currentUser} />
+                    </>
+                  ) : (
+                    <>
+                      <button className="w-full bg-red-600 text-white font-bold py-2 rounded-lg hover:bg-red-700">
+                        Report
+                      </button>
+                      <button className="w-full bg-red-600 text-white font-bold py-2 rounded-lg hover:bg-red-700">
+                        Block
+                      </button>
+                      <button className="w-full bg-red-600 text-white font-bold py-2 rounded-lg hover:bg-red-700">
+                        Delete Chat
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
