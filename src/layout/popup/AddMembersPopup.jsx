@@ -1,36 +1,50 @@
 import React, { useState } from "react";
-import "../styles/NewChatPopup.css";
-import { createGroup, searchUser, searchUserOrGroup } from "../redux/apiRequests";
-import UserButton from "./UserButton";
-import { useSelector } from "react-redux";
+import "../../styles/NewChatPopup.css";
+import {
+  addMembersToGroupChat,
+  getChatTarget,
+  searchUser,
+} from "../../redux/apiRequests";
+import { useDispatch } from "react-redux";
+import UserButton from "../UserButton";
 
-const NewGroupPopup = ({ isOpen, onClose }) => {
+const AddMembersPopup = ({ isOpen, onClose, groupID }) => {
   const [searchQuery, setSearchQuery] = useState(""); // search query (username)
   const [listTarget, setListTarget] = useState([]); // list users after searching from server
   const [error, setError] = useState(""); // error
-  const [name, setName] = useState(""); // group name
   const [listMembers, setListMembers] = useState([]); // list users, includes uaername, id, avatar -> used to handle logic FE
 
-  const currentUser = useSelector(state => state.user);
-  const [listUserIds, setListUserIds] = useState([currentUser.id]); // send to server, array of user ids
-  
+  const [memberIds, setMemberIds] = useState([]); // send to server, array of user ids
+
+  const dispatch = useDispatch();
+
   const resetState = () => {
     setSearchQuery("");
     setListTarget([]);
     setListMembers([]);
-    setListUserIds([currentUser.id]);
+    setMemberIds([]);
     setError("");
-    setName("");
-  }
+  };
 
   const handleClickX = () => {
     resetState();
     onClose();
   };
 
-  const handleCreateGroup = () => {
-    createGroup(listUserIds, name);
-    // console.log(listUserIds, name);
+  const handleAddMembers = async () => {
+    const newGroup = await addMembersToGroupChat(groupID, memberIds);
+    if (newGroup) {
+      alert("Added members to group chat successfully!");
+      const target = {
+        targetId: newGroup.groupID,
+        targetName: newGroup.name,
+        targetAvatar: newGroup.avatar,
+        targetType: "group",
+      };
+      getChatTarget(dispatch, target);
+    } else {
+      alert("Failed to add members to group chat! Please try again.");
+    }
     resetState();
     onClose();
   };
@@ -38,7 +52,9 @@ const NewGroupPopup = ({ isOpen, onClose }) => {
   const handleFind = async () => {
     const response = await searchUser(searchQuery);
     if (response.data.success) {
-      const list = response.data.listTarget.filter(l =>!listMembers.some(t => t.targetId === l.targetId));
+      const list = response.data.listTarget.filter(
+        (l) => !listMembers.some((t) => t.targetId === l.targetId)
+      );
       setListTarget(list);
     } else {
       setError(response.data.message);
@@ -48,13 +64,13 @@ const NewGroupPopup = ({ isOpen, onClose }) => {
 
   const removeUser = (user) => {
     setListMembers(listMembers.filter((t) => t.targetId !== user.targetId));
-    setListUserIds(listUserIds.filter((id) => id !== user.targetId));
+    setMemberIds(memberIds.filter((id) => id !== user.targetId));
     setListTarget([...listTarget, user]);
-  }
+  };
 
   const handleChoose = (target) => {
     setListMembers([...listMembers, target]);
-    setListUserIds([...listUserIds, target.targetId]);
+    setMemberIds([...memberIds, target.targetId]);
     setListTarget(listTarget.filter((t) => t.targetId !== target.targetId));
     setSearchQuery("");
   };
@@ -65,21 +81,10 @@ const NewGroupPopup = ({ isOpen, onClose }) => {
     <div className="popup-backdrop">
       <div className="popup-container">
         <div className="popup-header">
-          <h2 className="popup-title">New Group</h2>
+          <h2 className="popup-title">New Members</h2>
           <button className="popup-close" onClick={handleClickX}>
             ✖
           </button>
-        </div>
-        <div>
-          <input
-            type="text"
-            placeholder="Enter the group name..."
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-            }}
-            className="popup-input"
-          />
         </div>
         <div>
           {listMembers.length !== 0 && (
@@ -89,13 +94,17 @@ const NewGroupPopup = ({ isOpen, onClose }) => {
                   key={member.id}
                   className="flex items-center p-3 rounded-lg bg-gray-800 m-2"
                 >
-                  <UserButton id={member.targetId} username={member.targetName} func={() => removeUser(member)}/>
+                  <UserButton
+                    id={member.targetId}
+                    username={member.targetName}
+                    func={() => removeUser(member)}
+                  />
                 </div>
               ))}
-              </div>
+            </div>
           )}
         </div>
-        <div className="flex">
+        <div className="flex gap-3">
           <input
             type="text"
             placeholder="Type a username..."
@@ -107,9 +116,9 @@ const NewGroupPopup = ({ isOpen, onClose }) => {
             className="popup-input"
           />
           <button
-            className="popup-button font-bold"
+            className="popup-button font-bold w-1/2"
             onClick={handleFind}
-            disabled={searchQuery == ""}
+            disabled={searchQuery === ""}
           >
             Find User
           </button>
@@ -123,7 +132,13 @@ const NewGroupPopup = ({ isOpen, onClose }) => {
                 className={`flex items-center p-3 rounded-lg transition cursor-pointer my-2 hover:bg-gray-800`}
               >
                 <img
-                  src={target.targetAvatar}
+                  src={
+                    target.targetAvatar
+                      ? target.targetAvatar
+                      : target.targetType === "user"
+                      ? "https://cdn-icons-png.flaticon.com/512/9187/9187604.png"
+                      : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1gV7Edmn4Kmaz5tlr5d3K0Cyn17qa1Z-MCQ&s"
+                  }
                   alt={target.targetName}
                   className="w-10 h-10 rounded-full mr-3"
                 />
@@ -142,14 +157,14 @@ const NewGroupPopup = ({ isOpen, onClose }) => {
         )}
         <button
           className="popup-button font-bold"
-          onClick={handleCreateGroup}
-          disabled={name == "" || listMembers.length < 2}
+          onClick={handleAddMembers}
+          disabled={listMembers.length === 0}
         >
-          Create Group
+          Add Members
         </button>
       </div>
     </div>
   );
 };
 
-export default NewGroupPopup;
+export default AddMembersPopup;

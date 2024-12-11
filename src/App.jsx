@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import "./styles/global.css";
 import Sidebar from "./layout/Sidebar";
-import ChatWindow from "./layout/ChatWindow";
 import { useSelector, useDispatch } from "react-redux";
 import { getUser } from "./redux/apiRequests";
+import ChatWindow from "./layout/chat/ChatWindow";
 
 const ChatApp = () => {
   const currentUser = useSelector((state) => state.user);

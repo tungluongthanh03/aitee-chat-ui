@@ -6,10 +6,10 @@ import {
   getConversations,
   getMessages,
 } from "../redux/apiRequests";
-import PopupMenu from "./PopupMenu";
-import NewChatPopup from "./NewChatPopup";
+import PopupMenu from "./popup/PopupMenu";
+import NewChatPopup from "./popup/NewChatPopup";
 import { useSocket } from "./SocketContext";
-import NewGroupPopup from "./NewGroupPopup";
+import NewGroupPopup from "./popup/NewGroupPopup";
 
 const Sidebar = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -56,14 +56,10 @@ const Sidebar = () => {
         }
       });
 
-      // socket.on("receivedMessage", (message) => {
-
-      // });
-
       return () => {
-        console.log("Cleaning up socket listeners");
         socket.off("connect");
         socket.off("friendsOnline");
+        
       };
     }
   }, [socket, currentUser, onlineFriends]);
@@ -88,7 +84,6 @@ const Sidebar = () => {
       if (selectedUserId !== target?.targetId) {
         setSelectedUserId(target?.targetId);
         getChatTarget(dispatch, target);
-        getMessages(dispatch, target?.targetId);
       }
     },
     [selectedUserId, dispatch, currentUser.id]
@@ -178,37 +173,61 @@ const Sidebar = () => {
       {/* Messages List with Custom Scrollbar */}
       <h3 className="text-xl font-bold mb-4">Messages</h3>
       <div className="flex-1 space-y-2 overflow-y-auto scrollbar-custom">
-        {conversations?.list.map((target) => (
-          <div
-            key={target.targetId}
-            onClick={() => handleClick(target)}
-            className={`flex items-center p-3 rounded-lg transition cursor-pointer ${
-              selectedUserId === target.targetId
-                ? "bg-gray-800"
-                : "bg-black hover:bg-gray-900"
-            }`}
-          >
-            <img
-              src={
-                target.targetAvatar
-                  ? target.targetAvatar
-                  : target.targetType == "user"
-                  ? "https://cdn-icons-png.flaticon.com/512/9187/9187604.png"
-                  : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1gV7Edmn4Kmaz5tlr5d3K0Cyn17qa1Z-MCQ&s"
-              }
-              alt={target.targetName}
-              className="w-10 h-10 rounded-full mr-3"
-            />
-            <div>
-              <p className="text-white font-semibold">{target.targetName}</p>
-              <p className="text-gray-400 text-sm">
-                {target.targetId == currentUser.id ? "You: " : ""}
-                {target.lastMessage}
-              </p>
-              {/* <p className="text-gray-400 text-sm">{target.createdAt}</p> */}
+        {conversations?.list.map((target) => {
+          let lastMes = target.lastMessage;
+          if (lastMes?.length > 20) {
+            lastMes = lastMes.slice(0, 20) + "...";
+          }
+          const formattedTimestamp = new Date(target.createdAt).toLocaleString(
+            "en-US",
+            {
+              month: "2-digit",
+              day: "2-digit",
+              hour: "numeric",
+              minute: "2-digit",
+            }
+          ); // Output: "12/06, 3:30 PM"
+
+          return (
+            <div
+              key={target.targetId}
+              onClick={() => handleClick(target)}
+              className={`flex items-center justify-between p-3 rounded-lg transition cursor-pointer ${
+                selectedUserId === target.targetId
+                  ? "bg-gray-800"
+                  : "bg-black hover:bg-gray-900"
+              }`}
+            >
+              {/* Left Side: Avatar and Details */}
+              <div className="flex items-center">
+                <img
+                  src={
+                    target.targetAvatar
+                      ? target.targetAvatar
+                      : target.targetType === "user"
+                      ? "https://cdn-icons-png.flaticon.com/512/9187/9187604.png"
+                      : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1gV7Edmn4Kmaz5tlr5d3K0Cyn17qa1Z-MCQ&s"
+                  }
+                  alt={target.targetName}
+                  className="w-10 h-10 rounded-full mr-3"
+                />
+                <div>
+                  <p className="text-white font-semibold">
+                    {target.targetName}
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    {lastMes || "Images/Videos"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Right Side: Timestamp */}
+              <div className="font-bold text-gray-300 text-xs whitespace-nowrap ml-3">
+                {formattedTimestamp}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
