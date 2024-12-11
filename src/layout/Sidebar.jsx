@@ -52,6 +52,7 @@ const Sidebar = () => {
           Array.isArray(friends) &&
           JSON.stringify(friends) !== JSON.stringify(onlineFriends)
         ) {
+          console.log("wfhuhfufhe", friends);
           setOnlineFriends(friends);
         }
       });
@@ -161,10 +162,9 @@ const Sidebar = () => {
               alt="Online User"
               className="w-11 h-11 rounded-full border-2 border-green-500 hover:scale-110 transition-transform"
             />
-            <div className="absolute top-[-1.5rem] left-1/2 transform -translate-x-1/2 text-xs bg-gray-700 text-white py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity z-50">
-              {target.username || "Unknown"}
+            <div className="absolute top-[-1.5rem] left-1/2 transform -translate-x-1/2 text-xs bg-gray-700 text-white py-1 mt-4 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity z-50">
+              {target.targetName || "Unknown"}
             </div>
-            {/* Optional: Badge for online status */}
             <span className="absolute right-0 bottom-0 w-3 h-3 bg-green-500 border-2 border-black rounded-full"></span>
           </div>
         ))}

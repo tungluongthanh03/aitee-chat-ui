@@ -8,6 +8,8 @@ function ChatDetail({ chatUser, groupChat, currentUser }) {
   const [enlargedImage, setEnlargedImage] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [file, setFile] = useState(null);
+  const [previewAvatar, setPreviewAvatar] = useState(null);
+
 
   const [newGroupName, setNewGroupName] = useState(groupChat.name);
 
@@ -16,6 +18,7 @@ function ChatDetail({ chatUser, groupChat, currentUser }) {
     setIsEditingName(false);
     setFile(null);
     setNewGroupName(groupChat.name);
+    setPreviewAvatar(null);
   };
 
   const closeModal = () => setEnlargedImage(false);
@@ -38,7 +41,10 @@ function ChatDetail({ chatUser, groupChat, currentUser }) {
   // Handle avatar change
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0]; // Convert FileList to Array
-    setFile(selectedFile); // Append new files to existing state
+    if(selectedFile){
+      setFile(selectedFile);
+      setPreviewAvatar(URL.createObjectURL(selectedFile));
+    }
   };
 
   const handleChangeAvatar = async () => {
@@ -162,7 +168,7 @@ function ChatDetail({ chatUser, groupChat, currentUser }) {
           <div className="relative">
             {/* Enlarged Image */}
             <img
-              src={enlargedImage}
+              src={previewAvatar || enlargedImage}
               alt=""
               className="w-auto h-auto max-w-[90vw] max-h-[90vh] object-contain cursor-pointer"
               onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the image itself
