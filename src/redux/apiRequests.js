@@ -19,7 +19,7 @@ import axios from "axios";
 
 const url = "https://helped-alpaca-obliging.ngrok-free.app/api";
 // let token;
-let token = sessionStorage.getItem('token');
+let token = sessionStorage.getItem('accessToken');
 
 export const getCurrentUser = async (dispatch) => {
   try {
