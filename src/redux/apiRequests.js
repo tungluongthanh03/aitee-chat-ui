@@ -17,47 +17,47 @@ import {
 import { resetUser, updateUser } from "./userSlice";
 import axios from "axios";
 
-const url = "http://localhost:3000/api";
-let token;
-// const token = sessionStorage.getItem('keyToken');
+const url = "https://helped-alpaca-obliging.ngrok-free.app/api";
+// let token;
+let token = sessionStorage.getItem('token');
 
-// export const getCurrentUser = async (dispatch) => {
-//   try {
-//     const user = (
-//       await axios.get(url + "/user/", {
-//         headers: {
-//           Authorization: "Bearer " + token,
-//           "Content-Type": "application/json",
-//         },
-//       })).data.user;
-
-//       const currentUser = {
-//         id: user.id,
-//         username: user.username,
-//         avatar: user.avatar,
-//       }
-//       dispatch(updateUser(currentUser));
-//     } catch (e) {
-//       console.error("Error fetching current user:", e);
-//     }
-// }
-
-export const getUser = async (dispatch, login) => {
+export const getCurrentUser = async (dispatch) => {
   try {
-    const user = (await axios.post(url + `/user/login`, login)).data;
-    token = user.accessToken;
-    dispatch(
-      updateUser({
-        id: user.user.id,
-        username: user.user.username,
-        avatar: user.user.avatar,
-        accessToken: token,
-      })
-    );
-  } catch (e) {
-    console.error("Error fetching user:", e);
-  }
-};
+    const user = (
+      await axios.get(url + "/user/", {
+        headers: {
+          Authorization: "Bearer " + token,
+          "Content-Type": "application/json",
+        },
+      })).data.user;
+
+      const currentUser = {
+        id: user.id,
+        username: user.username,
+        avatar: user.avatar,
+      }
+      dispatch(updateUser(currentUser));
+    } catch (e) {
+      console.error("Error fetching current user:", e);
+    }
+}
+
+// export const getUser = async (dispatch, login) => {
+//   try {
+//     const user = (await axios.post(url + `/user/login`, login)).data;
+//     token = user.accessToken;
+//     dispatch(
+//       updateUser({
+//         id: user.user.id,
+//         username: user.user.username,
+//         avatar: user.user.avatar,
+//         accessToken: token,
+//       })
+//     );
+//   } catch (e) {
+//     console.error("Error fetching user:", e);
+//   }
+// };
 
 export const logout = (dispatch) => {
   token = null;
@@ -72,9 +72,11 @@ export const getConversations = async (dispatch) => {
         headers: {
           Authorization: "Bearer " + token,
           "Content-Type": "application/json",
+          'ngrok-skip-browser-warning': 'true', // ignore ngrok browser warning
         },
       })
     ).data.conversations;
+    console.log("conversations", conversations);
   } catch (err) {
     console.error("Error fetching conversations:", err);
     conversations = [];
@@ -94,6 +96,7 @@ export const getMembers = async (groupId) => {
         headers: {
           Authorization: "Bearer " + token,
           "Content-Type": "application/json",
+          'ngrok-skip-browser-warning': 'true', // ignore ngrok browser warning
         },
       })
     ).data.list;
@@ -138,6 +141,7 @@ export const getMessages = async (dispatch, userId) => {
         headers: {
           Authorization: "Bearer " + token,
           "Content-Type": "application/json",
+          'ngrok-skip-browser-warning': 'true', // ignore ngrok browser warning
         },
       })
     ).data.messages;
@@ -165,6 +169,7 @@ export const loadMoreMessages = async (dispatch, userId, offset) => {
           headers: {
             Authorization: "Bearer " + token,
             "Content-Type": "application/json",
+            'ngrok-skip-browser-warning': 'true', // ignore ngrok browser warning
           },
         }
       )
@@ -188,6 +193,7 @@ export const searchUserOrGroup = async (username) => {
         headers: {
           Authorization: "Bearer " + token,
           "Content-Type": "application/json",
+          'ngrok-skip-browser-warning': 'true', // ignore ngrok browser warning
         },
       }
     );
@@ -211,6 +217,7 @@ export const searchUser = async (username) => {
         headers: {
           Authorization: "Bearer " + token,
           "Content-Type": "application/json",
+          'ngrok-skip-browser-warning': 'true', // ignore ngrok browser warning
         },
       }
     );
@@ -231,6 +238,7 @@ export const createGroup = async (listUserIds, name) => {
           headers: {
             Authorization: "Bearer " + token,
             "Content-Type": "application/json",
+            'ngrok-skip-browser-warning': 'true', // ignore ngrok browser warning
           },
         }
       )
@@ -249,6 +257,7 @@ export const getGroupDetail = async (groupId) => {
         headers: {
           Authorization: "Bearer " + token,
           "Content-Type": "application/json",
+          'ngrok-skip-browser-warning': 'true', // ignore ngrok browser warning
         },
       })
     ).data.details;
@@ -266,6 +275,7 @@ export const getBlock = async (dispatch, targetId) => {
         headers: {
           Authorization: "Bearer " + token,
           "Content-Type": "application/json",
+          'ngrok-skip-browser-warning': 'true', // ignore ngrok browser warning
         },
       })
     ).data.block;
@@ -285,6 +295,7 @@ export const changeBlock = async (dispatch, blockedId, blockerId) => {
           headers: {
             Authorization: "Bearer " + token,
             "Content-Type": "application/json",
+            'ngrok-skip-browser-warning': 'true', // ignore ngrok browser warning
           },
         }
       )
@@ -312,6 +323,7 @@ export const addMembersToGroupChat = async (groupID, memberIds) => {
         headers: {
           Authorization: "Bearer " + token,
           "Content-Type": "application/json",
+          'ngrok-skip-browser-warning': 'true', // ignore ngrok browser warning
         },
       }
     );
@@ -331,6 +343,7 @@ export const removeMemberFromGroupChat = async (groupID, memberId) => {
         headers: {
           Authorization: "Bearer " + token,
           "Content-Type": "application/json",
+          'ngrok-skip-browser-warning': 'true', // ignore ngrok browser warning
         },
       }
     );
@@ -350,6 +363,7 @@ export const leaveGroupChat = async (groupID) => {
         headers: {
           Authorization: "Bearer " + token,
           "Content-Type": "application/json",
+          'ngrok-skip-browser-warning': 'true', // ignore ngrok browser warning
         },
       }
     );
@@ -370,6 +384,7 @@ export const dissolveGroupChat = async (groupID) => {
           headers: {
             Authorization: "Bearer " + token,
             "Content-Type": "application/json",
+            'ngrok-skip-browser-warning': 'true', // ignore ngrok browser warning
           },
         }
       )
@@ -387,6 +402,7 @@ export const updateGroupAvatar = async (formData) => {
       headers: {
         Authorization: "Bearer " + token,
         "Content-Type": "multipart/form-data",
+        'ngrok-skip-browser-warning': 'true', // ignore ngrok browser warning
       },
     });
     return res.data;
@@ -405,6 +421,7 @@ export const updateGroupName = async (groupID, name) => {
         headers: {
           Authorization: "Bearer " + token,
           "Content-Type": "application/json",
+          'ngrok-skip-browser-warning': 'true', // ignore ngrok browser warning
         },
       }
     );

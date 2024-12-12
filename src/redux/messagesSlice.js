@@ -11,6 +11,9 @@ export const messagesSlice = createSlice({
     },
 
     newMessage: (state, action) => {
+      if (!Array.isArray(state.list)) {
+        state.list = [];
+      }
       state.list.push(action.payload);
     },
 

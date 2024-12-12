@@ -149,7 +149,7 @@ function ChatMessages({ chatUser, groupChat, currentUser, dispatch }) {
           overflowY: "auto",
         }}
       >
-        {messages?.list.map((msg, idx) => {
+        {messages.list?.map((msg, idx) => {
           const isFirstInSequence =
             idx === messages.list.length - 1 ||
             msg.sendFrom !== messages.list[idx + 1].sendFrom;

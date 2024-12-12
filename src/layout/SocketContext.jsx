@@ -13,7 +13,11 @@ export const SocketProvider = ({ children }) => {
     let socketInstance = null;
     // Initialize the socket connection once
     if (!socket) {
-      socketInstance = io("http://localhost:3000"); // Adjust URL if needed
+      const socketInstance = io("https://helped-alpaca-obliging.ngrok-free.app", {
+        extraHeaders: {
+          "ngrok-skip-browser-warning": "true",
+        },
+      }); // Adjust URL if needed
       setSocket(socketInstance);
     }
 

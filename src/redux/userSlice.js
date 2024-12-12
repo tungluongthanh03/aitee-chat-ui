@@ -7,20 +7,20 @@ export const userSlice = createSlice({
     username: null,
     avatar:
       null,
-    accessToken: null,
+    // accessToken: null,
   },
   reducers: {
     updateUser: (state, action) => {
       state.username = action.payload.username;
       state.avatar = action.payload.avatar || "https://cdn-icons-png.flaticon.com/512/9187/9187604.png";
       state.id = action.payload.id;
-      state.accessToken = action.payload.accessToken;
+      // state.accessToken = action.payload.accessToken;
     },
     resetUser: (state) => {
       state.username = null;
       state.avatar = null;
       state.id = null;
-      state.accessToken = null;
+      // state.accessToken = null;
     }
   },
 });

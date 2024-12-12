@@ -173,7 +173,7 @@ const Sidebar = () => {
       {/* Messages List with Custom Scrollbar */}
       <h3 className="text-xl font-bold mb-4">Messages</h3>
       <div className="flex-1 space-y-2 overflow-y-auto scrollbar-custom">
-        {conversations?.list.map((target) => {
+        {conversations.list?.map((target) => {
           let lastMes = target.lastMessage;
           if (lastMes?.length > 20) {
             lastMes = lastMes.slice(0, 20) + "...";
