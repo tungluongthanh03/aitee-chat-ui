@@ -21,6 +21,27 @@ const url = "http://localhost:3000/api";
 let token;
 // const token = sessionStorage.getItem('keyToken');
 
+// export const getCurrentUser = async (dispatch) => {
+//   try {
+//     const user = (
+//       await axios.get(url + "/user/", {
+//         headers: {
+//           Authorization: "Bearer " + token,
+//           "Content-Type": "application/json",
+//         },
+//       })).data.user;
+
+//       const currentUser = {
+//         id: user.id,
+//         username: user.username,
+//         avatar: user.avatar,
+//       }
+//       dispatch(updateUser(currentUser));
+//     } catch (e) {
+//       console.error("Error fetching current user:", e);
+//     }
+// }
+
 export const getUser = async (dispatch, login) => {
   try {
     const user = (await axios.post(url + `/user/login`, login)).data;

@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./styles/global.css";
 import Sidebar from "./layout/Sidebar";
 import { useSelector, useDispatch } from "react-redux";
 import { getUser } from "./redux/apiRequests";
 import ChatWindow from "./layout/chat/ChatWindow";
+import LoadingIcon from "./layout/LoadingIcon";
 
 const ChatApp = () => {
   const currentUser = useSelector((state) => state.user);
@@ -20,6 +21,20 @@ const ChatApp = () => {
       getUser(dispatch, user);
     }
   };
+
+  // useEffect(() => {
+  //   if (currentUser?.username) {
+  //     const fetchUser = async () => {
+  //       await getCurrentUser(dispatch);
+  //     }
+  //     fetchUser();
+  //   }
+  // }, []);
+  
+
+  // if(currentUser?.username === null) {
+  //   return <LoadingIcon />;
+  // }
 
   if (currentUser?.username == null) {
     return (
